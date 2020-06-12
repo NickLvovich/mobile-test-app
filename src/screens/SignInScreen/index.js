@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,8 @@ import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import * as Animatable from 'react-native-animatable';
 
+import {AuthContext} from '../../components/context';
+
 const SignInScreen = ({navigation}) => {
   const [data, setData] = useState({
     email: '',
@@ -23,6 +25,8 @@ const SignInScreen = ({navigation}) => {
     check_textInputChange: false,
     secureTextEntry: true,
   });
+
+  const {signIn} = useContext(AuthContext);
 
   const textInputChange = (val) => {
     if (val.length !== 0) {
@@ -52,12 +56,17 @@ const SignInScreen = ({navigation}) => {
       secureTextEntry: !data.secureTextEntry,
     });
   };
+
+  const loginHandle = (username, password) => {
+    signIn(username, password)
+  }
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Animatable.View animation="fadeInDownBig" style={styles.header}>
         <Text style={styles.text_header}>Welcome!</Text>
-      </View>
-      <View style={styles.footer}>
+      </Animatable.View>
+      <Animatable.View animation="fadeInUpBig" style={styles.footer}>
         <Text style={styles.text_footer}>Email</Text>
         <View style={styles.action}>
           <FontAwesome name="user-o" color="#05375a" size={20} />
@@ -91,17 +100,40 @@ const SignInScreen = ({navigation}) => {
             />
           </TouchableOpacity>
         </View>
-				<View style={styles.button}>
-					<LinearGradient 
-						colors={['#08d4c4','#01ab9d']}
-						style={styles.signIn}
-					>
-						<Text> 
-							Sign In	
-						</Text>
-					</LinearGradient>
-				</View>
-      </View>
+        <View style={styles.button}>
+          <TouchableOpacity
+            style={styles.signIn}
+            onPress={() => {
+              {loginHandle(data.username, data.password)}
+            }}>
+            <LinearGradient
+              colors={['#191919', '#d85521']}
+              style={styles.signIn}>
+              <Text style={[styles.textSign, {color: '#fff'}]}>Sign In</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('SignUpScreen')}
+            style={[
+              styles.signIn,
+              {
+                borderColor: '#191919',
+                borderWidth: 1,
+                marginTop: 15,
+              },
+            ]}>
+            <Text
+              style={[
+                styles.textSign,
+                {
+                  color: '#191919',
+                },
+              ]}>
+              Sign Up
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Animatable.View>
     </View>
   );
 };
@@ -111,7 +143,7 @@ export default SignInScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#009387',
+    backgroundColor: '#191919',
   },
   header: {
     flex: 1,
