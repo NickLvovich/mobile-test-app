@@ -24,6 +24,8 @@ import {ActivityIndicator} from 'react-native-paper';
 
 import AsyncStorage from '@react-native-community/async-storage';
 
+import Users from './src/model/users'
+
 const Drawer = createDrawerNavigator();
 
 const App = () => {
@@ -72,25 +74,19 @@ const App = () => {
 
   const authContext = useMemo(
     () => ({
-      signIn: async (userName, password) => {
-        // setUserToken('fgsad');
-        // setIsLoading(false);
-        let userToken;
-        userToken = null;
-        if (userName === 'user' && password === 'pass') {
-          try {
-            userToken = 'dsadaw';
-            await AsyncStorage.setItem('userToken', userToken);
-          } catch (e) {
-            console.log('error', e);
-          }
+      signIn: async (foundUser) => {
+        const userToken = String(foundUser[0].userToken);
+        const userName = foundUser[0].username
+        try {
+          userToken = 'dsadaw';
+          await AsyncStorage.setItem('userToken', userToken);
+        } catch (e) {
+          console.log('error', e);
         }
 
         dispatch({type: 'LOGIN', id: userName, token: userToken});
       },
       signOut: async () => {
-        // setUserToken(null);
-        // setIsLoading(false);
         try {
           await AsyncStorage.removeItem('userToken');
         } catch (e) {
@@ -107,17 +103,16 @@ const App = () => {
   );
 
   useEffect(() => {
-    setTimeout(async() => {
-      // setIsLoading(false);
+    setTimeout(async () => {
       let userToken;
       userToken = null;
       try {
         userToken = await AsyncStorage.getItem('userToken');
-      } catch(e) {
+      } catch (e) {
         console.log(e);
       }
-      // console.log('user token: ', userToken);
-      dispatch({ type: 'RETRIEVE_TOKEN', token: userToken });
+      console.log('user token: ', userToken);
+      dispatch({type: 'RETRIEVE_TOKEN', token: userToken});
     }, 1000);
   }, []);
 

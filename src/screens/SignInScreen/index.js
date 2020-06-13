@@ -18,37 +18,52 @@ import * as Animatable from 'react-native-animatable';
 
 import {AuthContext} from '../../components/context';
 
+import users from '../../model/users';
+
 const SignInScreen = ({navigation}) => {
+  console.log('users', users)
   const [data, setData] = useState({
     username: '',
     password: '',
     check_textInputChange: false,
     secureTextEntry: true,
+    isValidUser: true,
+    isValidPassword: true,
   });
 
   const {signIn} = useContext(AuthContext);
 
   const textInputChange = (val) => {
-    if (val.length !== 0) {
+    if (val.trim().length >= 4) {
       setData({
         ...data,
         username: val,
         check_textInputChange: true,
+        isValidUser: true,
       });
     } else {
       setData({
         ...data,
         username: val,
         check_textInputChange: false,
+        isValidUser: false,
       });
     }
   };
   const handlePasswordChange = (val) => {
-    setData({
-      ...data,
-      password: val,
-      check_textInputChange: true,
-    });
+    if (val.trim().length >= 8) {
+      setData({
+        ...data,
+        password: val,
+        isValidPassword: true,
+      });
+    } else {
+      setData({
+        ...data,
+        password: val,
+        isValidPassword: false,
+      });
+    }
   };
   const updateSecureTextEntry = (val) => {
     setData({
@@ -57,9 +72,34 @@ const SignInScreen = ({navigation}) => {
     });
   };
 
+  const handleValidUser = (val) => {
+    if (val.trim().length >= 4) {
+      setData({
+        ...data,
+        isValidUser: true,
+      });
+    } else {
+      setData({
+        ...data,
+        isValidUser: false,
+      });
+    }
+  };
+
   const loginHandle = (username, password) => {
-    signIn(username, password)
-  }
+    const foundUser = users.filter((item) => {
+      return item.username === username && item.password === password;
+    });
+    if (data.username.length === 0 || data.password.length === 0) {
+      Alert.alert('Wrong input!', 'Username or password field cannot be empty', [{text: 'Ok'}]);
+      return;
+    }
+    if (foundUser.length === 0) {
+      Alert.alert('Invalid User!', 'Username or password', [{text: 'Ok'}]);
+      return;
+    }
+    signIn(foundUser);
+  };
 
   return (
     <View style={styles.container}>
@@ -75,6 +115,7 @@ const SignInScreen = ({navigation}) => {
             style={styles.textInput}
             autoCapitalize="none"
             onChangeText={(val) => textInputChange(val)}
+            onEndEditing={(e) => handleValidUser(e.nativeEvent.text)}
           />
           {data.check_textInputChange ? (
             <Animatable.View animation="bounceIn">
@@ -82,6 +123,14 @@ const SignInScreen = ({navigation}) => {
             </Animatable.View>
           ) : null}
         </View>
+        {data.isValidUser ? null : (
+          <Animatable.View animation="fadeInLeft" duration={500}>
+            <Text style={styles.errorMsg}>
+              Username must be 4 characters long.
+            </Text>
+          </Animatable.View>
+        )}
+
         <Text style={[styles.text_footer, {marginTop: 35}]}>Password</Text>
         <View style={styles.action}>
           <FontAwesome name="lock" color="#05375a" size={20} />
@@ -100,14 +149,24 @@ const SignInScreen = ({navigation}) => {
             />
           </TouchableOpacity>
         </View>
+        {data.isValidPassword ? null : (
+          <Animatable.View animation="fadeInLeft" duration={500}>
+            <Text style={styles.errorMsg}>
+              Password must be 8 characters long.
+            </Text>
+          </Animatable.View>
+        )}
+
         <View style={styles.button}>
           <TouchableOpacity
             style={styles.signIn}
             onPress={() => {
-              {loginHandle(data.username, data.password)}
+              {
+                loginHandle(data.username, data.password);
+              }
             }}>
             <LinearGradient
-              colors={['#191919', '#d85521']}
+              colors={['#191919', '#2c2c2c']}
               style={styles.signIn}>
               <Text style={[styles.textSign, {color: '#fff'}]}>Sign In</Text>
             </LinearGradient>

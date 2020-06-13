@@ -32,7 +32,7 @@ const SplashScreen = ({navigation}) => {
         <View style={styles.button}>
           <TouchableOpacity onPress={() => navigation.navigate('SignInScreen')}>
             <LinearGradient
-              colors={['#191919','#d85521']}
+              colors={['#191919','#2c2c2c']}
               style={styles.signIn}>
               <Text style={styles.textSign}>Get Started</Text>
               <MaterialIcons name="navigate-next" color="#fff" size={20} />
