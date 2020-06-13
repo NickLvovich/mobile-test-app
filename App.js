@@ -107,17 +107,17 @@ const App = () => {
   );
 
   useEffect(() => {
-    setTimeout(async () => {
+    setTimeout(async() => {
       // setIsLoading(false);
       let userToken;
       userToken = null;
       try {
         userToken = await AsyncStorage.getItem('userToken');
-      } catch (e) {
-        console.log('error', e);
+      } catch(e) {
+        console.log(e);
       }
-      console.log('userToken',userToken)
-      dispatch({type: 'LOGIN', token: userToken});
+      // console.log('user token: ', userToken);
+      dispatch({ type: 'RETRIEVE_TOKEN', token: userToken });
     }, 1000);
   }, []);
 

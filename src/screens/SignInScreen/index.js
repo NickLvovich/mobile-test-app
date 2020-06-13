@@ -20,7 +20,7 @@ import {AuthContext} from '../../components/context';
 
 const SignInScreen = ({navigation}) => {
   const [data, setData] = useState({
-    email: '',
+    username: '',
     password: '',
     check_textInputChange: false,
     secureTextEntry: true,
@@ -32,13 +32,13 @@ const SignInScreen = ({navigation}) => {
     if (val.length !== 0) {
       setData({
         ...data,
-        email: val,
+        username: val,
         check_textInputChange: true,
       });
     } else {
       setData({
         ...data,
-        email: val,
+        username: val,
         check_textInputChange: false,
       });
     }
@@ -67,11 +67,11 @@ const SignInScreen = ({navigation}) => {
         <Text style={styles.text_header}>Welcome!</Text>
       </Animatable.View>
       <Animatable.View animation="fadeInUpBig" style={styles.footer}>
-        <Text style={styles.text_footer}>Email</Text>
+        <Text style={styles.text_footer}>Name</Text>
         <View style={styles.action}>
           <FontAwesome name="user-o" color="#05375a" size={20} />
           <TextInput
-            placeholder="Your Email"
+            placeholder="Your Name"
             style={styles.textInput}
             autoCapitalize="none"
             onChangeText={(val) => textInputChange(val)}
