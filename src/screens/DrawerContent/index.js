@@ -1,6 +1,7 @@
-import React, { useState, useContext } from 'react';
-import {View, Button, StyleSheet} from 'react-native';
+import React, {useContext} from 'react';
+import {View, StyleSheet} from 'react-native';
 import {
+  useTheme,
   Avatar,
   Title,
   Caption,
@@ -14,15 +15,13 @@ import {DrawerContentScrollView, DrawerItem} from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {AuthContext} from '../../components/context';
+import {inject, observer} from 'mobx-react';
 
-export function DrawerContent(props) {
-    const [isDarkTheme, setIsDarkTheme] = useState(false)
+export function DrawerContent (props) {
 
-    const {signOut} = useContext(AuthContext)
- 
-    const toggleTheme = () => {
-        setIsDarkTheme(!isDarkTheme)
-    }
+  const paperTheme = useTheme();
+
+  const {signOut, toggleTheme} = useContext(AuthContext);
 
   return (
     <View style={{flex: 1}}>
@@ -112,7 +111,7 @@ export function DrawerContent(props) {
               <View style={styles.preference}>
                 <Text>Dark Theme</Text>
                 <View pointerEvents="none">
-                  <Switch value={isDarkTheme} />
+                  <Switch value={paperTheme.dark} />
                 </View>
               </View>
             </TouchableRipple>
@@ -125,12 +124,15 @@ export function DrawerContent(props) {
             <Icon name="exit-to-app" color={color} size={size} />
           )}
           label="Sign Out"
-          onPress={() => {signOut()}}
+          onPress={() => {
+            signOut();
+          }}
         />
       </Drawer.Section>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   drawerContent: {

@@ -8,8 +8,21 @@
 
 import React, {useState, useEffect, useMemo, useReducer} from 'react';
 import {View} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DefaultTheme as NavigationDefaultTheme,
+  DarkTheme as NavigationDarkTheme,
+} from '@react-navigation/native';
 import {createDrawerNavigator} from '@react-navigation/drawer';
+
+import {
+  Provider as PaperProvider,
+  DefaultTheme as PaperDefaultTheme,
+  DarkTheme as PaperDarkTheme,
+} from 'react-native-paper';
+
+import {Provider as MobxProvider} from 'mobx-react';
+
 import {DrawerContent} from './src/screens/DrawerContent';
 
 import MainTabScreen from './src/screens/MainTabScreen';
@@ -18,25 +31,48 @@ import SettingScreen from './src/screens/SettingScreen';
 import BookmarkScreen from './src/screens/BookmarkScreen';
 
 import {AuthContext} from './src/components/context';
+import store from './src/components/store';
 
 import RootStackScreen from './src/screens/RootStackScreen';
 import {ActivityIndicator} from 'react-native-paper';
 
 import AsyncStorage from '@react-native-community/async-storage';
-
-import Users from './src/model/users'
+import 'mobx-react-lite/batchingForReactNative';
 
 const Drawer = createDrawerNavigator();
 
 const App = () => {
-  // const [isLoading, setIsLoading] = useState(true);
-  // const [userToken, setUserToken] = useState(null);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   const initialLoginState = {
     isLoading: true,
-    userName: null,
+    email: null,
     userToken: null,
   };
+
+  const CustomDefaultTheme = {
+    ...NavigationDefaultTheme,
+    ...PaperDefaultTheme,
+    colors: {
+      ...NavigationDefaultTheme.colors,
+      ...PaperDefaultTheme.colors,
+      background: '#fff',
+      text: '#333333',
+    },
+  };
+
+  const CustomDarkTheme = {
+    ...NavigationDarkTheme,
+    ...PaperDarkTheme,
+    colors: {
+      ...NavigationDarkTheme.colors,
+      ...PaperDarkTheme.colors,
+      background: '#333333',
+      text: '#fff',
+    },
+  };
+
+  const theme = isDarkTheme ? CustomDarkTheme : CustomDefaultTheme;
 
   const loginReducer = (prevState, action) => {
     switch (action.type) {
@@ -49,21 +85,21 @@ const App = () => {
       case 'LOGIN':
         return {
           ...prevState,
-          userName: action.id,
+          email: action.id,
           userToken: action.token,
           isLoading: false,
         };
       case 'LOGOUT':
         return {
           ...prevState,
-          userName: null,
+          email: null,
           userToken: null,
           isLoading: false,
         };
       case 'REGISTER':
         return {
           ...prevState,
-          userName: action.id,
+          email: action.id,
           userToken: action.token,
           isLoading: false,
         };
@@ -75,15 +111,15 @@ const App = () => {
   const authContext = useMemo(
     () => ({
       signIn: async (foundUser) => {
-        const userToken = String(foundUser[0].userToken);
-        const userName = foundUser[0].username
+        const userToken = foundUser.secret;
+        const email = foundUser.name;
         try {
           await AsyncStorage.setItem('userToken', userToken);
         } catch (e) {
           console.log('error', e);
         }
 
-        dispatch({type: 'LOGIN', id: userName, token: userToken});
+        dispatch({type: 'LOGIN', id: email, token: userToken});
       },
       signOut: async () => {
         try {
@@ -93,26 +129,24 @@ const App = () => {
         }
         dispatch({type: 'LOGOUT'});
       },
-      signUp: () => {
-        // setUserToken('fgsad');
-        // setIsLoading(false);
+      signUp: () => {},
+      toggleTheme: () => {
+        setIsDarkTheme((isDarkTheme) => !isDarkTheme);
       },
     }),
     [],
   );
 
   useEffect(() => {
-    setTimeout(async () => {
-      let userToken;
-      userToken = null;
-      try {
-        userToken = await AsyncStorage.getItem('userToken');
-      } catch (e) {
-        console.log(e);
-      }
-      console.log('user token: ', userToken);
-      dispatch({type: 'RETRIEVE_TOKEN', token: userToken});
-    }, 1000);
+    let userToken;
+    userToken = null;
+    try {
+      userToken = AsyncStorage.getItem('userToken');
+    } catch (e) {
+      console.log(e);
+    }
+    console.log(userToken)
+    dispatch({type: 'RETRIEVE_TOKEN', token: userToken});
   }, []);
 
   if (loginState.isLoading) {
@@ -124,21 +158,28 @@ const App = () => {
   }
 
   return (
-    <AuthContext.Provider value={authContext}>
-      <NavigationContainer>
-        {loginState.userToken === null ? (
-          <RootStackScreen />
-        ) : (
-          <Drawer.Navigator
-            drawerContent={(props) => <DrawerContent {...props} />}>
-            <Drawer.Screen name="HomeDrawer" component={MainTabScreen} />
-            <Drawer.Screen name="SupportScreen" component={SupportScreen} />
-            <Drawer.Screen name="SettingScreen" component={SettingScreen} />
-            <Drawer.Screen name="BookmarkScreen" component={BookmarkScreen} />
-          </Drawer.Navigator>
-        )}
-      </NavigationContainer>
-    </AuthContext.Provider>
+    <MobxProvider store={store}>
+      <PaperProvider theme={theme}>
+        <AuthContext.Provider value={authContext}>
+          <NavigationContainer theme={theme}>
+            {loginState.userToken === null ? (
+              <RootStackScreen />
+            ) : (
+              <Drawer.Navigator
+                drawerContent={(drawerProps) => <DrawerContent {...drawerProps} />}>
+                <Drawer.Screen name="HomeDrawer" component={MainTabScreen} />
+                <Drawer.Screen name="SupportScreen" component={SupportScreen} />
+                <Drawer.Screen name="SettingScreen" component={SettingScreen} />
+                <Drawer.Screen
+                  name="BookmarkScreen"
+                  component={BookmarkScreen}
+                />
+              </Drawer.Navigator>
+            )}
+          </NavigationContainer>
+        </AuthContext.Provider>
+      </PaperProvider>
+    </MobxProvider>
   );
 };
 
