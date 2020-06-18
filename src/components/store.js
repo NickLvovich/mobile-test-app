@@ -9,17 +9,12 @@ class Store {
   secureTextEntry = true;
   isValidUser = true;
   isValidPassword = true;
-  data = [];
+  isConfirmValidPassword = true;
+  confirm_secureTextEntry = true;
+  confirm_password = '';
 
-  updateUsername = (email) => {
-    this.email = email;
-  };
-  updatePassword = (password) => {
-    this.password = password;
-  };
-
-  fetchUser = (email, password) => {
-    fetch('https://dev.addictivelearning.io/api/v1/login', {
+  fetchUser = async (email, password) => {
+    await fetch('https://dev.addictivelearning.io/api/v1/login', {
       body: `email=${email}&password=${password}`,
       headers: {
         Accept: 'application/json',
@@ -47,7 +42,23 @@ class Store {
       method: 'POST',
     })
       .then((response) => response.json())
-      .then((responce) => console.log(responce))
+      .then((userData) => this.setData(userData))
+      .catch((error) => error);
+  };
+
+  register = async (email, password, confirm_password) => {
+    fetch('https://dev.addictivelearning.io/api/v1/register', {
+      body:
+        `email=${email}&password=${password}&password_confirmation=${confirm_password}`,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Csrf-Token': 'MnP9ICvp71L4HGBvNwKo0BjTs5h3OdQqyUKsg7HU',
+      },
+      method: 'POST',
+    })
+      .then((response) => response.json())
+      .then((userData) => this.setData(userData))
       .catch((error) => error);
   };
 }
@@ -62,7 +73,13 @@ decorate(Store, {
   check_textInputChange: observable,
   secureTextEntry: observable,
   isValidUser: observable,
+  isConfirmValidPassword: observable,
   isValidPassword: observable,
+  setData: action,
+  logout: action,
+  confirm_secureTextEntry: observable,
+  confirm_password: observable,
+  signUp: action
 });
 
 // export class

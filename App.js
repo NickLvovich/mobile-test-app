@@ -112,9 +112,10 @@ const App = () => {
     () => ({
       signIn: async (foundUser) => {
         const userToken = foundUser.secret;
-        const email = foundUser.name;
+        const email = foundUser.email;
+        
         try {
-          await AsyncStorage.setItem('userToken', userToken);
+         await AsyncStorage.setItem('userToken', userToken);
         } catch (e) {
           console.log('error', e);
         }
@@ -122,14 +123,27 @@ const App = () => {
         dispatch({type: 'LOGIN', id: email, token: userToken});
       },
       signOut: async () => {
+        
         try {
+          await store.logout()
           await AsyncStorage.removeItem('userToken');
         } catch (e) {
           console.log('error', e);
         }
         dispatch({type: 'LOGOUT'});
       },
-      signUp: () => {},
+      signUp: async (registerUser) => {
+        const userToken = registerUser.secret;
+        const email = registerUser.email;
+        
+        try {
+         await AsyncStorage.setItem('userToken', userToken);
+        } catch (e) {
+          console.log('error', e);
+        }
+
+        dispatch({type: 'REGISTER', id: email, token: userToken});
+      },
       toggleTheme: () => {
         setIsDarkTheme((isDarkTheme) => !isDarkTheme);
       },
@@ -138,16 +152,18 @@ const App = () => {
   );
 
   useEffect(() => {
-    let userToken;
-    userToken = null;
-    try {
-      userToken = AsyncStorage.getItem('userToken');
-    } catch (e) {
-      console.log(e);
-    }
-    console.log(userToken)
-    dispatch({type: 'RETRIEVE_TOKEN', token: userToken});
-  }, []);
+    setTimeout(async() => {
+      // setIsLoading(false);
+      let userToken;
+      userToken = null;
+      try {
+        userToken = await AsyncStorage.getItem('userToken');
+      } catch(e) {
+        console.log(e);
+      }
+      dispatch({ type: 'RETRIEVE_TOKEN', token: userToken });
+    }, 1000);
+  }, [loginState]);
 
   if (loginState.isLoading) {
     return (

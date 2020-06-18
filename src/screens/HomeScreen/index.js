@@ -21,7 +21,6 @@ const HomeScreen = (props, {navigation}) => {
       <Button
         onPress={() => {
           signOut();
-          logout();
         }}
         title="Go to details"
       />

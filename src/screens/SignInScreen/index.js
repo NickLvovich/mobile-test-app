@@ -19,12 +19,9 @@ import {useTheme} from 'react-native-paper';
 
 import {AuthContext} from '../../components/context';
 
-import users from '../../model/users';
-
-// imports inject and observer from 'mobx-react':
 import {inject, observer} from 'mobx-react';
 
-const SignInScreen = (props, {navigation}) => {
+const SignInScreen = (props) => {
   const {
     email,
     password,
@@ -33,12 +30,9 @@ const SignInScreen = (props, {navigation}) => {
     isValidUser,
     isValidPassword,
     fetchUser,
-    logout,
     userData,
   } = props.store;
 
-
-  console.log('userData', userData);
 
   const {colors} = useTheme();
 
@@ -108,15 +102,18 @@ const SignInScreen = (props, {navigation}) => {
 
   const loginHandle = async (email, password) => {
     await fetchUser(email, password);
+
+    const foundUser = userData.data;
+
+ 
     if (userData.message === 'The given data was invalid.') {
       Alert.alert('Invalid User!', 'Email or password', [{text: 'Ok'}]);
     } else if (userData.message === 'already authenticated') {
       Alert.alert('User already authenticated!', [{text: 'Ok'}]);
     }
-    const foundUser = userData.data;
 
     if (foundUser !== undefined) {
-      signIn(foundUser);
+      await signIn(foundUser);
     }
   };
 
@@ -225,7 +222,7 @@ const SignInScreen = (props, {navigation}) => {
                 style={[
                   styles.textSign,
                   {
-                    color: colors.background
+                    color: colors.background,
                   },
                 ]}>
                 Sign In
@@ -233,10 +230,7 @@ const SignInScreen = (props, {navigation}) => {
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
-            // onPress={() => navigation.navigate('SignUpScreen')}
-            onPress={() => {
-              logout();
-            }}
+            onPress={() => props.navigation.navigate('SignUpScreen')}
             style={[
               styles.signIn,
               {
